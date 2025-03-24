@@ -1,0 +1,9 @@
+{
+	"name": "envtestadf",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "f4edd0c0-1427-4543-9da4-472e9d982890",
+		"tenantId": "22877e52-e9fd-410d-91a3-817d8ab89d63"
+	}
+}
