@@ -48,7 +48,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"schemaName": "saleslt",
-							"tableName": "Address"
+							"tableName": "Customer"
 						}
 					}
 				],
@@ -57,7 +57,7 @@
 						"referenceName": "adls_csv_DS",
 						"type": "DatasetReference",
 						"parameters": {
-							"folderPath": "Address"
+							"folderPath": "Customer"
 						}
 					}
 				]
