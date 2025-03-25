@@ -33,7 +33,7 @@
 					],
 					"ifTrueActivities": [
 						{
-							"name": "Copy Product Data",
+							"name": "Copy child if Product Data",
 							"type": "Copy",
 							"dependsOn": [],
 							"policy": {
