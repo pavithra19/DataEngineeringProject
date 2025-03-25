@@ -1,0 +1,84 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "envtestadf"
+		},
+		"devtestadls_LS_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'devtestadls_LS'"
+		},
+		"testsqlDB_LS_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'testsqlDB_LS'"
+		},
+		"devtestadls_LS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://devtestadls.dfs.core.windows.net/"
+		},
+		"testsqlDB_LS_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "testdbserverdev.database.windows.net"
+		},
+		"testsqlDB_LS_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "@{linkedService().databaseName}"
+		},
+		"testsqlDB_LS_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "adminCredentials"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "envtestadf_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"devtestadls_LS_accountKey": {
+						"value": "[parameters('devtestadls_LS_accountKey')]"
+					},
+					"testsqlDB_LS_password": {
+						"value": "[parameters('testsqlDB_LS_password')]"
+					},
+					"devtestadls_LS_properties_typeProperties_url": {
+						"value": "[parameters('devtestadls_LS_properties_typeProperties_url')]"
+					},
+					"testsqlDB_LS_properties_typeProperties_server": {
+						"value": "[parameters('testsqlDB_LS_properties_typeProperties_server')]"
+					},
+					"testsqlDB_LS_properties_typeProperties_database": {
+						"value": "[parameters('testsqlDB_LS_properties_typeProperties_database')]"
+					},
+					"testsqlDB_LS_properties_typeProperties_userName": {
+						"value": "[parameters('testsqlDB_LS_properties_typeProperties_userName')]"
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}
