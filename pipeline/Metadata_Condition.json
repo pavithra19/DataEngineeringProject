@@ -1,0 +1,169 @@
+{
+	"name": "Metadata_Condition",
+	"properties": {
+		"activities": [
+			{
+				"name": "If File does not exists perform copy",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Get Metadata info from ADLS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@activity('Get Metadata info from ADLS').output.exists",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Get Metadata info of sql db",
+							"type": "GetMetadata",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "Generic_sqldb_DS",
+									"type": "DatasetReference",
+									"parameters": {
+										"schemaName": "saleslt",
+										"tableName": "Address"
+									}
+								},
+								"fieldList": [
+									"exists"
+								]
+							}
+						},
+						{
+							"name": "Copy Address Table",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Get Metadata info of sql db",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "Generic_sqldb_DS",
+									"type": "DatasetReference",
+									"parameters": {
+										"schemaName": "saleslt",
+										"tableName": "Address"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "adls_csv_DS",
+									"type": "DatasetReference",
+									"parameters": {
+										"folderPath": "MetaData_Condition"
+									}
+								}
+							]
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Failure message",
+							"type": "Fail",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"message": "File already available in ADLS location.",
+								"errorCode": "1022"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Get Metadata info from ADLS",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "adls_csv_DS",
+						"type": "DatasetReference",
+						"parameters": {
+							"folderPath": "MetaData_Condition/saleslt.Address.txt"
+						}
+					},
+					"fieldList": [
+						"exists",
+						"childItems",
+						"itemName",
+						"itemType",
+						"lastModified"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			}
+		],
+		"annotations": []
+	}
+}
