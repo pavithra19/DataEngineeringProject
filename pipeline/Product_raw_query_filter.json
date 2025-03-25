@@ -58,7 +58,7 @@
 						"referenceName": "adls_csv_DS",
 						"type": "DatasetReference",
 						"parameters": {
-							"folderPath": "Product"
+							"folderPath": "Product_raw_query_filter"
 						}
 					}
 				]
