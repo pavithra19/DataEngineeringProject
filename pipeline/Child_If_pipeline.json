@@ -1,0 +1,129 @@
+{
+	"name": "Child_If_pipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "If Condition Product count",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Lookup Product count",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greaterOrEquals(activity('Lookup Product count').output.firstRow.RecordCount, 200)",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Failure message",
+							"type": "Fail",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"message": "Product count is not sufficient to perform the copy action.",
+								"errorCode": "1001"
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Copy Product Data",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "Generic_sqldb_DS",
+									"type": "DatasetReference",
+									"parameters": {
+										"schemaName": "saleslt",
+										"tableName": "Product"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "adls_csv_DS",
+									"type": "DatasetReference",
+									"parameters": {
+										"folderPath": "Product_child_if_copy"
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "Lookup Product count",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "select count(*) as RecordCount from saleslt.Product",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "Generic_sqldb_DS",
+						"type": "DatasetReference",
+						"parameters": {
+							"schemaName": "saleslt",
+							"tableName": "Product"
+						}
+					}
+				}
+			}
+		],
+		"annotations": []
+	}
+}

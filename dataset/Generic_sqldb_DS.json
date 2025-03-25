@@ -3,7 +3,10 @@
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "testsqlDB_LS",
-			"type": "LinkedServiceReference"
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"databaseName": "testsqlDB"
+			}
 		},
 		"parameters": {
 			"schemaName": {
