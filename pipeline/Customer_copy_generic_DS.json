@@ -57,7 +57,10 @@
 						"referenceName": "adls_csv_DS",
 						"type": "DatasetReference",
 						"parameters": {
-							"folderPath": "Customer"
+							"folderPath": {
+								"value": "@concat('Customer/', formatDateTime(utcNow(), 'yyyy'), '/', formatDateTime(utcNow(), 'MM'), '/', formatDateTime(utcNow(), 'dd'), '/', formatDateTime(utcNow(), 'HH'), '/', formatDateTime(utcNow(), 'mm'), '/', formatDateTime(utcNow(), 'ss'))",
+								"type": "Expression"
+							}
 						}
 					}
 				]
