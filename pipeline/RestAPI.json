@@ -1,0 +1,59 @@
+{
+	"name": "RestAPI",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy Universities data from Rest API",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "UniSearchApp_RestAPI_DS",
+						"type": "DatasetReference",
+						"parameters": {
+							"countryName": "india"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "adls_csv_DS",
+						"type": "DatasetReference",
+						"parameters": {
+							"folderPath": "UniSearchApp_RestAPI"
+						}
+					}
+				]
+			}
+		],
+		"annotations": []
+	}
+}
