@@ -22,6 +22,9 @@
 		},
 		"testsqlDB_LS_properties_typeProperties_userName": {
 			"value": "adminCredentials"
+		},
+		"UniSearchApp_RestAPI_LS_properties_typeProperties_url": {
+			"value": "http://universities.hipolabs.com"
 		}
 	}
 }

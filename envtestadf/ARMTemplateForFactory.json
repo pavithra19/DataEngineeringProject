@@ -30,6 +30,10 @@
 		"testsqlDB_LS_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "adminCredentials"
+		},
+		"UniSearchApp_RestAPI_LS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "http://universities.hipolabs.com"
 		}
 	},
 	"variables": {
@@ -843,10 +847,7 @@
 								"referenceName": "adls_csv_DS",
 								"type": "DatasetReference",
 								"parameters": {
-									"folderPath": {
-										"value": "@concat('Variable_Update/')",
-										"type": "Expression"
-									}
+									"folderPath": "Variable_Update"
 								}
 							}
 						]
@@ -954,10 +955,7 @@
 								"referenceName": "adls_csv_DS",
 								"type": "DatasetReference",
 								"parameters": {
-									"folderPath": {
-										"value": "@concat('Variable_Update/')",
-										"type": "Expression"
-									}
+									"folderPath": "Variable_Update"
 								}
 							}
 						]
@@ -1101,6 +1099,134 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/UniSearchApp_RestAPI')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy Universities data from Rest API",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mapComplexValuesToString": false
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "UniSearchApp_RestAPI_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"countryName": {
+										"value": "@pipeline().parameters.countryName",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "adls_csv_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"folderPath": {
+										"value": "@concat('UniSearchApp_RestAPI/', pipeline().parameters.countryName)",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"countryName": {
+						"type": "string",
+						"defaultValue": "india"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/UniSearchApp_RestAPI_DS')]",
+				"[concat(variables('factoryId'), '/datasets/adls_csv_DS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/UniSearchApp_RestAPI_LS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "RestService",
+				"typeProperties": {
+					"url": "[parameters('UniSearchApp_RestAPI_LS_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Anonymous"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/UniSearchApp_RestAPI_DS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "UniSearchApp_RestAPI_LS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"countryName": {
+						"type": "string",
+						"defaultValue": "germany"
+					}
+				},
+				"annotations": [],
+				"type": "RestResource",
+				"typeProperties": {
+					"relativeUrl": {
+						"value": "@concat('/search?country=', dataset().countryName)",
+						"type": "Expression"
+					}
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/UniSearchApp_RestAPI_LS')]"
+			]
 		}
 	]
 }
