@@ -82,10 +82,7 @@
 						"referenceName": "adls_csv_DS",
 						"type": "DatasetReference",
 						"parameters": {
-							"folderPath": {
-								"value": "@concat('Variable_Update/')",
-								"type": "Expression"
-							}
+							"folderPath": "Variable_Update"
 						}
 					}
 				]
@@ -193,10 +190,7 @@
 						"referenceName": "adls_csv_DS",
 						"type": "DatasetReference",
 						"parameters": {
-							"folderPath": {
-								"value": "@concat('Variable_Update/')",
-								"type": "Expression"
-							}
+							"folderPath": "Variable_Update"
 						}
 					}
 				]
