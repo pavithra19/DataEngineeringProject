@@ -51,6 +51,8 @@
 						},
 						"formatSettings": {
 							"type": "DelimitedTextWriteSettings",
+							"maxRowsPerFile": 500,
+							"fileNamePrefix": "Raw_",
 							"quoteAllText": true,
 							"fileExtension": ".txt"
 						}
@@ -80,7 +82,10 @@
 						"referenceName": "adls_csv_DS",
 						"type": "DatasetReference",
 						"parameters": {
-							"folderPath": "Variable_Update"
+							"folderPath": {
+								"value": "@concat('Variable_Update/')",
+								"type": "Expression"
+							}
 						}
 					}
 				]
@@ -157,6 +162,8 @@
 						},
 						"formatSettings": {
 							"type": "DelimitedTextWriteSettings",
+							"maxRowsPerFile": 500,
+							"fileNamePrefix": "DataWithTimestamp_",
 							"quoteAllText": true,
 							"fileExtension": ".txt"
 						}
@@ -186,7 +193,10 @@
 						"referenceName": "adls_csv_DS",
 						"type": "DatasetReference",
 						"parameters": {
-							"folderPath": "Variable_Update"
+							"folderPath": {
+								"value": "@concat('Variable_Update/')",
+								"type": "Expression"
+							}
 						}
 					}
 				]
