@@ -1,5 +1,5 @@
 {
-	"name": "RestAPI",
+	"name": "UniSearchApp_RestAPI",
 	"properties": {
 		"activities": [
 			{
@@ -32,14 +32,21 @@
 							"fileExtension": ".txt"
 						}
 					},
-					"enableStaging": false
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mapComplexValuesToString": false
+					}
 				},
 				"inputs": [
 					{
 						"referenceName": "UniSearchApp_RestAPI_DS",
 						"type": "DatasetReference",
 						"parameters": {
-							"countryName": "india"
+							"countryName": {
+								"value": "@pipeline().parameters.countryName",
+								"type": "Expression"
+							}
 						}
 					}
 				],
@@ -48,12 +55,21 @@
 						"referenceName": "adls_csv_DS",
 						"type": "DatasetReference",
 						"parameters": {
-							"folderPath": "UniSearchApp_RestAPI"
+							"folderPath": {
+								"value": "@concat('UniSearchApp_RestAPI/', pipeline().parameters.countryName)",
+								"type": "Expression"
+							}
 						}
 					}
 				]
 			}
 		],
+		"parameters": {
+			"countryName": {
+				"type": "string",
+				"defaultValue": "india"
+			}
+		},
 		"annotations": []
 	}
 }
