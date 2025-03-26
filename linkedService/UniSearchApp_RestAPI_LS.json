@@ -1,0 +1,12 @@
+{
+	"name": "UniSearchApp_RestAPI_LS",
+	"properties": {
+		"annotations": [],
+		"type": "RestService",
+		"typeProperties": {
+			"url": "http://universities.hipolabs.com",
+			"enableServerCertificateValidation": true,
+			"authenticationType": "Anonymous"
+		}
+	}
+}
