@@ -1,0 +1,12 @@
+{
+	"name": "Covid_Tracking_App_RestAPI_LS",
+	"properties": {
+		"annotations": [],
+		"type": "RestService",
+		"typeProperties": {
+			"url": "https://api.covidtracking.com",
+			"enableServerCertificateValidation": true,
+			"authenticationType": "Anonymous"
+		}
+	}
+}
