@@ -58,9 +58,8 @@
 									"referenceName": "adls_csv_DS_Files",
 									"type": "DatasetReference",
 									"parameters": {
-										"folderPath": "RAW",
 										"fileName": {
-											"value": "@item()",
+											"value": "@concat('RAW/', item())",
 											"type": "Expression"
 										}
 									}
