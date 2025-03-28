@@ -1,0 +1,23 @@
+{
+	"name": "Covid_Tracking_App_RestAPI_DS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Covid_Tracking_App_RestAPI_LS",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"TrackingDate": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "RestResource",
+		"typeProperties": {
+			"relativeUrl": {
+				"value": "@concat('/v1/us/', dataset().TrackingDate, '.json')",
+				"type": "Expression"
+			}
+		},
+		"schema": []
+	}
+}

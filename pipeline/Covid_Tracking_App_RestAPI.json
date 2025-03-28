@@ -1,0 +1,99 @@
+{
+	"name": "Covid_Tracking_App_RestAPI",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy datewise Covid data",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET",
+						"paginationRules": {
+							"supportRFC5988": "true"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "Covid_Tracking_App_RestAPI_DS",
+						"type": "DatasetReference",
+						"parameters": {
+							"TrackingDate": {
+								"value": "@concat(variables('Year'), variables('Month'), variables('Date'))",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "adls_csv_DS",
+						"type": "DatasetReference",
+						"parameters": {
+							"folderPath": {
+								"value": "@concat('Covid_Tracking_App_RestAPI/', variables('Year'), '/', variables('Month'), '/', variables('Date'))",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "API failure message",
+				"type": "Fail",
+				"dependsOn": [
+					{
+						"activity": "Copy datewise Covid data",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"message": "Data not found for the mentioned date. Change the date to view the tracking data.",
+					"errorCode": "10003"
+				}
+			}
+		],
+		"variables": {
+			"Year": {
+				"type": "String",
+				"defaultValue": "2021"
+			},
+			"Month": {
+				"type": "String",
+				"defaultValue": "01"
+			},
+			"Date": {
+				"type": "String",
+				"defaultValue": "19"
+			}
+		},
+		"annotations": []
+	}
+}
