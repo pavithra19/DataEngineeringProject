@@ -93,6 +93,9 @@
 					},
 					"testsqlDB_LS_properties_typeProperties_userName": {
 						"value": "[parameters('testsqlDB_LS_properties_typeProperties_userName')]"
+					},
+					"Storage_Event_Trigger_properties_typeProperties_scope": {
+						"value": "[parameters('Storage_Event_Trigger_properties_typeProperties_scope')]"
 					}
 				}
 			},
@@ -111,9 +114,6 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
-					},
-					"Storage_Event_Trigger_properties_typeProperties_scope": {
-						"value": "[parameters('Storage_Event_Trigger_properties_typeProperties_scope')]"
 					}
 				}
 			},
