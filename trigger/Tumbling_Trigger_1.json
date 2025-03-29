@@ -1,0 +1,17 @@
+{
+	"name": "Tumbling_Trigger_1",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Minute",
+				"interval": 15,
+				"startTime": "2025-03-29T18:15:00",
+				"timeZone": "W. Europe Standard Time"
+			}
+		}
+	}
+}
