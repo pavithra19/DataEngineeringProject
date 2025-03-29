@@ -1,13 +1,5 @@
 {
 	"name": "envtestadf",
-	"properties": {
-		"globalParameters": {
-			"TableName": {
-				"type": "string",
-				"value": "Customer"
-			}
-		}
-	},
 	"location": "eastus",
 	"identity": {
 		"type": "SystemAssigned",
