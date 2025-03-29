@@ -24,7 +24,7 @@
 					"type": "LinkedServiceReference"
 				},
 				"secretName": "SqlDBCredentials",
-				"secretVersion": "2535eece900e4d60b1ab082ad64efde5"
+				"secretVersion": "bb9134d98ec04f83a5eb9a7c4220d84b"
 			}
 		}
 	},
