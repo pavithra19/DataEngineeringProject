@@ -1,5 +1,5 @@
 {
-	"name": "Incremental_Pipeline_for_SalesOrderDetail",
+	"name": "Incremental_Update_for_Customer",
 	"properties": {
 		"activities": [
 			{
