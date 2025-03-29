@@ -55,11 +55,12 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "adls_csv_DS_Files",
+									"referenceName": "adls_csv_Folder_File_Header_DS",
 									"type": "DatasetReference",
 									"parameters": {
+										"folderPath": "RAW",
 										"fileName": {
-											"value": "@concat('RAW/', item())",
+											"value": "@item()",
 											"type": "Expression"
 										}
 									}
