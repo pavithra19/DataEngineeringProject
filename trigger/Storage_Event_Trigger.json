@@ -1,0 +1,17 @@
+{
+	"name": "Storage_Event_Trigger",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [],
+		"type": "BlobEventsTrigger",
+		"typeProperties": {
+			"blobPathBeginsWith": "/landing/blobs/Product_raw_query_filter/",
+			"ignoreEmptyBlobs": true,
+			"scope": "/subscriptions/169e780c-2be0-4ad0-9c34-65652cef15fe/resourceGroups/devenvironment/providers/Microsoft.Storage/storageAccounts/devtestadls",
+			"events": [
+				"Microsoft.Storage.BlobCreated"
+			]
+		}
+	}
+}
