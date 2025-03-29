@@ -6,6 +6,10 @@
 			"type": "string",
 			"metadata": "Data Factory name",
 			"defaultValue": "envtestadf"
+		},
+		"Storage_Event_Trigger_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/169e780c-2be0-4ad0-9c34-65652cef15fe/resourceGroups/devenvironment/providers/Microsoft.Storage/storageAccounts/devtestadls"
 		}
 	},
 	"variables": {
@@ -179,6 +183,34 @@
 						"startTime": "2025-03-29T18:11:00",
 						"timeZone": "W. Europe Standard Time"
 					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Storage_Event_Trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "Customer_copy_generic_DS",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/landing/blobs/Product_raw_query_filter/",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('Storage_Event_Trigger_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
 				}
 			},
 			"dependsOn": []

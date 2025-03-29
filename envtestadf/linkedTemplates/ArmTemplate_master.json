@@ -39,6 +39,10 @@
 			"type": "string",
 			"defaultValue": "adminCredentials"
 		},
+		"Storage_Event_Trigger_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/169e780c-2be0-4ad0-9c34-65652cef15fe/resourceGroups/devenvironment/providers/Microsoft.Storage/storageAccounts/devtestadls"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -107,6 +111,9 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"Storage_Event_Trigger_properties_typeProperties_scope": {
+						"value": "[parameters('Storage_Event_Trigger_properties_typeProperties_scope')]"
 					}
 				}
 			},

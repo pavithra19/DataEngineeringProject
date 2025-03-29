@@ -28,6 +28,9 @@
 		},
 		"testsqlDB_LS_properties_typeProperties_userName": {
 			"value": "adminCredentials"
+		},
+		"Storage_Event_Trigger_properties_typeProperties_scope": {
+			"value": "/subscriptions/169e780c-2be0-4ad0-9c34-65652cef15fe/resourceGroups/devenvironment/providers/Microsoft.Storage/storageAccounts/devtestadls"
 		}
 	}
 }

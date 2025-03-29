@@ -1280,7 +1280,7 @@
 						"typeProperties": {
 							"source": {
 								"type": "AzureSqlSource",
-								"sqlReaderQuery": "SELECT * FROM [SalesLT].[Product] where ProductNumber like '%HL-U509%'",
+								"sqlReaderQuery": "SELECT * FROM [SalesLT].[Product] where ProductNumber like '%FR-R92B%'",
 								"queryTimeout": "02:00:00",
 								"partitionOption": "None"
 							},
