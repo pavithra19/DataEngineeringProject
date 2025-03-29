@@ -1,5 +1,5 @@
 {
-	"name": "adls_File_DS",
+	"name": "adls_csv_Filepath_No_Header_DS",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "devtestadls_LS",
