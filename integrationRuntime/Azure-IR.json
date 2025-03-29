@@ -4,7 +4,7 @@
 		"type": "Managed",
 		"typeProperties": {
 			"computeProperties": {
-				"location": "France Central",
+				"location": "AutoResolve",
 				"dataFlowProperties": {
 					"computeType": "General",
 					"coreCount": 8,
