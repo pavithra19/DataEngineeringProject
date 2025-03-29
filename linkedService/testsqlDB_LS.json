@@ -23,7 +23,8 @@
 					"referenceName": "AzureKeyVault_LS",
 					"type": "LinkedServiceReference"
 				},
-				"secretName": "SqlDBCredentials"
+				"secretName": "SqlDBCredentials",
+				"secretVersion": "2535eece900e4d60b1ab082ad64efde5"
 			}
 		}
 	},
