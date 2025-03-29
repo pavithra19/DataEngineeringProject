@@ -1,0 +1,17 @@
+{
+	"name": "Schedule_Trigger",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Minute",
+				"interval": 5,
+				"startTime": "2025-03-29T18:11:00",
+				"timeZone": "W. Europe Standard Time"
+			}
+		}
+	}
+}
