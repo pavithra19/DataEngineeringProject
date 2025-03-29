@@ -11,6 +11,12 @@
 		"testsqlDB_LS_password": {
 			"value": ""
 		},
+		"Covid_Tracking_App_RestAPI_LS_properties_typeProperties_url": {
+			"value": "https://api.covidtracking.com"
+		},
+		"UniSearchApp_RestAPI_LS_properties_typeProperties_url": {
+			"value": "http://universities.hipolabs.com"
+		},
 		"devtestadls_LS_properties_typeProperties_url": {
 			"value": "https://devtestadls.dfs.core.windows.net/"
 		},
@@ -22,9 +28,6 @@
 		},
 		"testsqlDB_LS_properties_typeProperties_userName": {
 			"value": "adminCredentials"
-		},
-		"UniSearchApp_RestAPI_LS_properties_typeProperties_url": {
-			"value": "http://universities.hipolabs.com"
 		},
 		"containerUri": {
 			"value": ""

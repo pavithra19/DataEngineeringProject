@@ -1,1 +1,6 @@
-{}
+{
+	"TestingGlobalParam_(TableName)": {
+		"type": "string",
+		"value": "testsqlDB"
+	}
+}

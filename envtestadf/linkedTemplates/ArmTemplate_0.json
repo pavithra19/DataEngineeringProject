@@ -15,6 +15,14 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'testsqlDB_LS'"
 		},
+		"Covid_Tracking_App_RestAPI_LS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://api.covidtracking.com"
+		},
+		"UniSearchApp_RestAPI_LS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "http://universities.hipolabs.com"
+		},
 		"devtestadls_LS_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://devtestadls.dfs.core.windows.net/"
@@ -30,16 +38,42 @@
 		"testsqlDB_LS_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "adminCredentials"
-		},
-		"UniSearchApp_RestAPI_LS_properties_typeProperties_url": {
-			"type": "string",
-			"defaultValue": "http://universities.hipolabs.com"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/Covid_Tracking_App_RestAPI_LS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "RestService",
+				"typeProperties": {
+					"url": "[parameters('Covid_Tracking_App_RestAPI_LS_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Anonymous"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/UniSearchApp_RestAPI_LS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "RestService",
+				"typeProperties": {
+					"url": "[parameters('UniSearchApp_RestAPI_LS_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Anonymous"
+				}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/devtestadls_LS')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
@@ -88,19 +122,32 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/UniSearchApp_RestAPI_LS')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"name": "[concat(parameters('factoryName'), '/Covid_Tracking_App_RestAPI_DS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Covid_Tracking_App_RestAPI_LS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"TrackingDate": {
+						"type": "string"
+					}
+				},
 				"annotations": [],
-				"type": "RestService",
+				"type": "RestResource",
 				"typeProperties": {
-					"url": "[parameters('UniSearchApp_RestAPI_LS_properties_typeProperties_url')]",
-					"enableServerCertificateValidation": true,
-					"authenticationType": "Anonymous"
-				}
+					"relativeUrl": {
+						"value": "@concat('/v1/us/', dataset().TrackingDate, '.json')",
+						"type": "Expression"
+					}
+				},
+				"schema": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Covid_Tracking_App_RestAPI_LS')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/Generic_sqldb_DS')]",
@@ -141,6 +188,35 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/UniSearchApp_RestAPI_DS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "UniSearchApp_RestAPI_LS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"countryName": {
+						"type": "string",
+						"defaultValue": "germany"
+					}
+				},
+				"annotations": [],
+				"type": "RestResource",
+				"typeProperties": {
+					"relativeUrl": {
+						"value": "@concat('/search?country=', dataset().countryName)",
+						"type": "Expression"
+					}
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/UniSearchApp_RestAPI_LS')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/adls_csv_DS')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -177,32 +253,180 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/UniSearchApp_RestAPI_DS')]",
+			"name": "[concat(parameters('factoryName'), '/adls_csv_Filepath_No_Header_DS')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"linkedServiceName": {
-					"referenceName": "UniSearchApp_RestAPI_LS",
+					"referenceName": "devtestadls_LS",
 					"type": "LinkedServiceReference"
 				},
 				"parameters": {
-					"countryName": {
-						"type": "string",
-						"defaultValue": "germany"
+					"fileName": {
+						"type": "string"
 					}
 				},
 				"annotations": [],
-				"type": "RestResource",
+				"type": "DelimitedText",
 				"typeProperties": {
-					"relativeUrl": {
-						"value": "@concat('/search?country=', dataset().countryName)",
-						"type": "Expression"
-					}
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().fileName",
+							"type": "Expression"
+						},
+						"fileSystem": "landing"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
 				},
 				"schema": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/UniSearchApp_RestAPI_LS')]"
+				"[concat(variables('factoryId'), '/linkedServices/devtestadls_LS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls_csv_Folder_File_Header_DS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "devtestadls_LS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"folderPath": {
+						"type": "string"
+					},
+					"fileName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().fileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().folderPath",
+							"type": "Expression"
+						},
+						"fileSystem": "landing"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/devtestadls_LS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADLS_to_Sql_Optimised_Data_Ingestion')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "For each - copy all files",
+						"type": "ForEach",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@createArray('Customer', 'Product')",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy files to tables",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureBlobFSReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "AzureSqlSink",
+											"writeBehavior": "insert",
+											"sqlWriterUseTableLock": false,
+											"disableMetricsCollection": false
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "adls_csv_Folder_File_Header_DS",
+											"type": "DatasetReference",
+											"parameters": {
+												"folderPath": "RAW",
+												"fileName": {
+													"value": "@item()",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "Generic_sqldb_DS",
+											"type": "DatasetReference",
+											"parameters": {
+												"schemaName": "saleslt",
+												"tableName": {
+													"value": "@item()",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/adls_csv_Folder_File_Header_DS')]",
+				"[concat(variables('factoryId'), '/datasets/Generic_sqldb_DS')]"
 			]
 		},
 		{
@@ -340,6 +564,114 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/Generic_sqldb_DS')]",
+				"[concat(variables('factoryId'), '/datasets/adls_csv_DS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Covid_Tracking_App_RestAPI')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy datewise Covid data",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET",
+								"paginationRules": {
+									"supportRFC5988": "true"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "Covid_Tracking_App_RestAPI_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"TrackingDate": {
+										"value": "@concat(variables('Year'), variables('Month'), variables('Date'))",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "adls_csv_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"folderPath": {
+										"value": "@concat('Covid_Tracking_App_RestAPI/', variables('Year'), '/', variables('Month'), '/', variables('Date'))",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "API failure message",
+						"type": "Fail",
+						"dependsOn": [
+							{
+								"activity": "Copy datewise Covid data",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"message": "Data not found for the mentioned date. Change the date to view the tracking data.",
+							"errorCode": "10003"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"Year": {
+						"type": "String",
+						"defaultValue": "2021"
+					},
+					"Month": {
+						"type": "String",
+						"defaultValue": "01"
+					},
+					"Date": {
+						"type": "String",
+						"defaultValue": "19"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Covid_Tracking_App_RestAPI_DS')]",
 				"[concat(variables('factoryId'), '/datasets/adls_csv_DS')]"
 			]
 		},
@@ -518,6 +850,231 @@
 				"annotations": []
 			},
 			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Generic_sqldb_DS')]",
+				"[concat(variables('factoryId'), '/datasets/adls_csv_DS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Incremental_Update_for_Customer')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get highwatermark file timestamp",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "adls_csv_Filepath_No_Header_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"fileName": "HighWaterMark.txt"
+								}
+							},
+							"firstRowOnly": true
+						}
+					},
+					{
+						"name": "Get last modified date from db",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Get highwatermark file timestamp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "SELECT MAX(ModifiedDate) AS LastModifiedDate FROM [SalesLT].[Customer]",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "Generic_sqldb_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"schemaName": "saleslt",
+									"tableName": "Customer"
+								}
+							}
+						}
+					},
+					{
+						"name": "Copy only updated records",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Get last modified date from db",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "@concat('select * from saleslt.Customer where ModifiedDate > ''', formatDateTime(activity('Get highwatermark file timestamp').output.firstRow.Prop_0, 'yyyy-MM-dd HH:mm:ss'), ''' and ModifiedDate <= ''', activity('Get last modified date from db').output.firstRow.LastModifiedDate, '''')",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "Generic_sqldb_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"schemaName": "saleslt",
+									"tableName": "Customer"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "adls_csv_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"folderPath": "Incremental_Update/Customer"
+								}
+							}
+						]
+					},
+					{
+						"name": "Updating HighWaterMark file with timestamp",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Copy only updated records",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "SELECT MAX(ModifiedDate) AS LastModifiedDate FROM [SalesLT].[Customer]",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "Generic_sqldb_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"schemaName": "saleslt",
+									"tableName": "Customer"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "adls_csv_Filepath_No_Header_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"fileName": "HighWaterMark.txt"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/adls_csv_Filepath_No_Header_DS')]",
 				"[concat(variables('factoryId'), '/datasets/Generic_sqldb_DS')]",
 				"[concat(variables('factoryId'), '/datasets/adls_csv_DS')]"
 			]
@@ -780,6 +1337,90 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/UniSearchApp_RestAPI')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy Universities data from Rest API",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mapComplexValuesToString": false
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "UniSearchApp_RestAPI_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"countryName": {
+										"value": "@pipeline().parameters.countryName",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "adls_csv_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"folderPath": {
+										"value": "@concat('UniSearchApp_RestAPI/', pipeline().parameters.countryName)",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"countryName": {
+						"type": "string",
+						"defaultValue": "india"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/UniSearchApp_RestAPI_DS')]",
+				"[concat(variables('factoryId'), '/datasets/adls_csv_DS')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Variable_Data_and_New_Column_Update')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -994,237 +1635,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/Generic_sqldb_DS')]",
-				"[concat(variables('factoryId'), '/datasets/adls_csv_DS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/UniSearchApp_RestAPI')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy Universities data from Rest API",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "RestSource",
-								"httpRequestTimeout": "00:01:40",
-								"requestInterval": "00.00:00:00.010",
-								"requestMethod": "GET"
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"mapComplexValuesToString": false
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "UniSearchApp_RestAPI_DS",
-								"type": "DatasetReference",
-								"parameters": {
-									"countryName": {
-										"value": "@pipeline().parameters.countryName",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "adls_csv_DS",
-								"type": "DatasetReference",
-								"parameters": {
-									"folderPath": {
-										"value": "@concat('UniSearchApp_RestAPI/', pipeline().parameters.countryName)",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"countryName": {
-						"type": "string",
-						"defaultValue": "india"
-					}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/UniSearchApp_RestAPI_DS')]",
-				"[concat(variables('factoryId'), '/datasets/adls_csv_DS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Parent_If_Condition_Nested_pipeline')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Cx records count",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": "select count(*) as RecordCount from saleslt.customer",
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "Generic_sqldb_DS",
-								"type": "DatasetReference",
-								"parameters": {
-									"schemaName": "saleslt",
-									"tableName": "Customer"
-								}
-							},
-							"firstRowOnly": true
-						}
-					},
-					{
-						"name": "If Condition for Record Count",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "Cx records count",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@greater(activity('Cx records count').output.firstRow.RecordCount, 1000)",
-								"type": "Expression"
-							},
-							"ifFalseActivities": [
-								{
-									"name": "Execute Child If Pipeline",
-									"type": "ExecutePipeline",
-									"dependsOn": [],
-									"policy": {
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"pipeline": {
-											"referenceName": "Child_If_pipeline",
-											"type": "PipelineReference"
-										},
-										"waitOnCompletion": true,
-										"parameters": {}
-									}
-								}
-							],
-							"ifTrueActivities": [
-								{
-									"name": "Copy parent if - Customer data",
-									"type": "Copy",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "AzureSqlSource",
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "DelimitedTextSink",
-											"storeSettings": {
-												"type": "AzureBlobFSWriteSettings"
-											},
-											"formatSettings": {
-												"type": "DelimitedTextWriteSettings",
-												"quoteAllText": true,
-												"fileExtension": ".txt"
-											}
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"typeConversion": true,
-											"typeConversionSettings": {
-												"allowDataTruncation": true,
-												"treatBooleanAsNumber": false
-											}
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "Generic_sqldb_DS",
-											"type": "DatasetReference",
-											"parameters": {
-												"schemaName": "saleslt",
-												"tableName": "Customer"
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "adls_csv_DS",
-											"type": "DatasetReference",
-											"parameters": {
-												"folderPath": "Customer_parent_if_copy"
-											}
-										}
-									]
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/Generic_sqldb_DS')]",
-				"[concat(variables('factoryId'), '/pipelines/Child_If_pipeline')]",
 				"[concat(variables('factoryId'), '/datasets/adls_csv_DS')]"
 			]
 		}

@@ -15,6 +15,14 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'testsqlDB_LS'"
 		},
+		"Covid_Tracking_App_RestAPI_LS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://api.covidtracking.com"
+		},
+		"UniSearchApp_RestAPI_LS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "http://universities.hipolabs.com"
+		},
 		"devtestadls_LS_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://devtestadls.dfs.core.windows.net/"
@@ -30,10 +38,6 @@
 		"testsqlDB_LS_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "adminCredentials"
-		},
-		"UniSearchApp_RestAPI_LS_properties_typeProperties_url": {
-			"type": "string",
-			"defaultValue": "http://universities.hipolabs.com"
 		},
 		"containerUri": {
 			"type": "string",
@@ -68,6 +72,12 @@
 					"testsqlDB_LS_password": {
 						"value": "[parameters('testsqlDB_LS_password')]"
 					},
+					"Covid_Tracking_App_RestAPI_LS_properties_typeProperties_url": {
+						"value": "[parameters('Covid_Tracking_App_RestAPI_LS_properties_typeProperties_url')]"
+					},
+					"UniSearchApp_RestAPI_LS_properties_typeProperties_url": {
+						"value": "[parameters('UniSearchApp_RestAPI_LS_properties_typeProperties_url')]"
+					},
 					"devtestadls_LS_properties_typeProperties_url": {
 						"value": "[parameters('devtestadls_LS_properties_typeProperties_url')]"
 					},
@@ -79,13 +89,30 @@
 					},
 					"testsqlDB_LS_properties_typeProperties_userName": {
 						"value": "[parameters('testsqlDB_LS_properties_typeProperties_userName')]"
-					},
-					"UniSearchApp_RestAPI_LS_properties_typeProperties_url": {
-						"value": "[parameters('UniSearchApp_RestAPI_LS_properties_typeProperties_url')]"
 					}
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "envtestadf_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'envtestadf_ArmTemplate_0')]"
+			]
 		}
 	]
 }
