@@ -1785,9 +1785,15 @@
 						"type": "SecureString",
 						"value": "[parameters('testsqlDB_LS_password')]"
 					}
+				},
+				"connectVia": {
+					"referenceName": "Azure-IR",
+					"type": "IntegrationRuntimeReference"
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/Azure-IR')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/Schedule_Trigger')]",
@@ -1844,6 +1850,27 @@
 						"interval": 15,
 						"startTime": "2025-03-29T18:15:00",
 						"timeZone": "W. Europe Standard Time"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Azure-IR')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 10,
+							"cleanup": false,
+							"customProperties": []
+						}
 					}
 				}
 			},
