@@ -1,5 +1,13 @@
 {
 	"name": "envtestadf",
+	"properties": {
+		"globalParameters": {
+			"TestingGlobalParam_(TableName)": {
+				"type": "string",
+				"value": "testsqlDB"
+			}
+		}
+	},
 	"location": "eastus",
 	"identity": {
 		"type": "SystemAssigned",
