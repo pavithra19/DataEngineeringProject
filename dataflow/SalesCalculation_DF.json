@@ -19,7 +19,15 @@
 					"name": "ProductDetails"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "adls_csv_DS",
+						"type": "DatasetReference"
+					},
+					"name": "SaveResultToADLS"
+				}
+			],
 			"transformations": [
 				{
 					"name": "SelectingSalesDetails"
@@ -93,7 +101,14 @@
 				"     broadcast: 'auto')~> FindTopSellingProducts",
 				"ProductDetails, FindTopSellingProducts exists(ProductDetails@ProductID == SelectingSalesDetails@ProductID,",
 				"     negate:false,",
-				"     broadcast: 'auto')~> GetTopSellingProduct"
+				"     broadcast: 'auto')~> GetTopSellingProduct",
+				"GetTopSellingProduct sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SaveResultToADLS"
 			]
 		}
 	}
