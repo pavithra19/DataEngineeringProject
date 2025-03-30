@@ -27,10 +27,6 @@
 			"type": "string",
 			"defaultValue": "https://devtestadls.dfs.core.windows.net/"
 		},
-		"Storage_Event_Trigger_properties_typeProperties_scope": {
-			"type": "string",
-			"defaultValue": "/subscriptions/169e780c-2be0-4ad0-9c34-65652cef15fe/resourceGroups/devenvironment/providers/Microsoft.Storage/storageAccounts/devtestadls"
-		},
 		"testsqlDB_LS_properties_typeProperties_server": {
 			"type": "string",
 			"defaultValue": "testdbserverdev.database.windows.net"
@@ -42,6 +38,10 @@
 		"testsqlDB_LS_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "adminCredentials"
+		},
+		"Storage_Event_Trigger_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/169e780c-2be0-4ad0-9c34-65652cef15fe/resourceGroups/devenvironment/providers/Microsoft.Storage/storageAccounts/devtestadls"
 		}
 	},
 	"variables": {
@@ -91,6 +91,35 @@
 					"accountKey": {
 						"type": "SecureString",
 						"value": "[parameters('devtestadls_LS_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/testsqlDB_LS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "SQL Database Linked Service",
+				"parameters": {
+					"databaseName": {
+						"type": "string",
+						"defaultValue": "testsqlDB"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"server": "[parameters('testsqlDB_LS_properties_typeProperties_server')]",
+					"database": "[parameters('testsqlDB_LS_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": false,
+					"authenticationType": "SQL",
+					"userName": "[parameters('testsqlDB_LS_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('testsqlDB_LS_password')]"
 					}
 				}
 			},
@@ -178,6 +207,16 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/SelfHosted-IR')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Covid_Tracking_App_RestAPI_DS')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -203,6 +242,44 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/Covid_Tracking_App_RestAPI_LS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Generic_sqldb_DS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "testsqlDB_LS",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"databaseName": "testsqlDB"
+					}
+				},
+				"parameters": {
+					"schemaName": {
+						"type": "string"
+					},
+					"tableName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().schemaName",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().tableName",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/testsqlDB_LS')]"
 			]
 		},
 		{
@@ -347,271 +424,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/devtestadls_LS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/testsqlDB_LS')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "SQL Database Linked Service",
-				"parameters": {
-					"databaseName": {
-						"type": "string",
-						"defaultValue": "testsqlDB"
-					}
-				},
-				"annotations": [],
-				"type": "AzureSqlDatabase",
-				"typeProperties": {
-					"server": "[parameters('testsqlDB_LS_properties_typeProperties_server')]",
-					"database": "[parameters('testsqlDB_LS_properties_typeProperties_database')]",
-					"encrypt": "mandatory",
-					"trustServerCertificate": false,
-					"authenticationType": "SQL",
-					"userName": "[parameters('testsqlDB_LS_properties_typeProperties_userName')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('testsqlDB_LS_password')]"
-					}
-				},
-				"connectVia": {
-					"referenceName": "Azure-IR",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/Azure-IR')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Covid_Tracking_App_RestAPI')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy datewise Covid data",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "RestSource",
-								"httpRequestTimeout": "00:01:40",
-								"requestInterval": "00.00:00:00.010",
-								"requestMethod": "GET",
-								"paginationRules": {
-									"supportRFC5988": "true"
-								}
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false
-						},
-						"inputs": [
-							{
-								"referenceName": "Covid_Tracking_App_RestAPI_DS",
-								"type": "DatasetReference",
-								"parameters": {
-									"TrackingDate": {
-										"value": "@concat(variables('Year'), variables('Month'), variables('Date'))",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "adls_csv_DS",
-								"type": "DatasetReference",
-								"parameters": {
-									"folderPath": {
-										"value": "@concat('Covid_Tracking_App_RestAPI/', variables('Year'), '/', variables('Month'), '/', variables('Date'))",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					},
-					{
-						"name": "API failure message",
-						"type": "Fail",
-						"dependsOn": [
-							{
-								"activity": "Copy datewise Covid data",
-								"dependencyConditions": [
-									"Failed"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"message": "Data not found for the mentioned date. Change the date to view the tracking data.",
-							"errorCode": "10003"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"variables": {
-					"Year": {
-						"type": "String",
-						"defaultValue": "2021"
-					},
-					"Month": {
-						"type": "String",
-						"defaultValue": "01"
-					},
-					"Date": {
-						"type": "String",
-						"defaultValue": "19"
-					}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/Covid_Tracking_App_RestAPI_DS')]",
-				"[concat(variables('factoryId'), '/datasets/adls_csv_DS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/UniSearchApp_RestAPI')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy Universities data from Rest API",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "RestSource",
-								"httpRequestTimeout": "00:01:40",
-								"requestInterval": "00.00:00:00.010",
-								"requestMethod": "GET"
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"mapComplexValuesToString": false
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "UniSearchApp_RestAPI_DS",
-								"type": "DatasetReference",
-								"parameters": {
-									"countryName": {
-										"value": "@pipeline().parameters.countryName",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "adls_csv_DS",
-								"type": "DatasetReference",
-								"parameters": {
-									"folderPath": {
-										"value": "@concat('UniSearchApp_RestAPI/', pipeline().parameters.countryName)",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"countryName": {
-						"type": "string",
-						"defaultValue": "india"
-					}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/UniSearchApp_RestAPI_DS')]",
-				"[concat(variables('factoryId'), '/datasets/adls_csv_DS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Generic_sqldb_DS')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "testsqlDB_LS",
-					"type": "LinkedServiceReference",
-					"parameters": {
-						"databaseName": "testsqlDB"
-					}
-				},
-				"parameters": {
-					"schemaName": {
-						"type": "string"
-					},
-					"tableName": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": {
-						"value": "@dataset().schemaName",
-						"type": "Expression"
-					},
-					"table": {
-						"value": "@dataset().tableName",
-						"type": "Expression"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/testsqlDB_LS')]"
 			]
 		},
 		{
@@ -847,6 +659,114 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/Generic_sqldb_DS')]",
+				"[concat(variables('factoryId'), '/datasets/adls_csv_DS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Covid_Tracking_App_RestAPI')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy datewise Covid data",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET",
+								"paginationRules": {
+									"supportRFC5988": "true"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "Covid_Tracking_App_RestAPI_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"TrackingDate": {
+										"value": "@concat(variables('Year'), variables('Month'), variables('Date'))",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "adls_csv_DS",
+								"type": "DatasetReference",
+								"parameters": {
+									"folderPath": {
+										"value": "@concat('Covid_Tracking_App_RestAPI/', variables('Year'), '/', variables('Month'), '/', variables('Date'))",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "API failure message",
+						"type": "Fail",
+						"dependsOn": [
+							{
+								"activity": "Copy datewise Covid data",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"message": "Data not found for the mentioned date. Change the date to view the tracking data.",
+							"errorCode": "10003"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"Year": {
+						"type": "String",
+						"defaultValue": "2021"
+					},
+					"Month": {
+						"type": "String",
+						"defaultValue": "01"
+					},
+					"Date": {
+						"type": "String",
+						"defaultValue": "19"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Covid_Tracking_App_RestAPI_DS')]",
 				"[concat(variables('factoryId'), '/datasets/adls_csv_DS')]"
 			]
 		},

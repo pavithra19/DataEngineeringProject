@@ -85,9 +85,6 @@
 					"devtestadls_LS_properties_typeProperties_url": {
 						"value": "[parameters('devtestadls_LS_properties_typeProperties_url')]"
 					},
-					"Storage_Event_Trigger_properties_typeProperties_scope": {
-						"value": "[parameters('Storage_Event_Trigger_properties_typeProperties_scope')]"
-					},
 					"testsqlDB_LS_properties_typeProperties_server": {
 						"value": "[parameters('testsqlDB_LS_properties_typeProperties_server')]"
 					},
@@ -96,6 +93,9 @@
 					},
 					"testsqlDB_LS_properties_typeProperties_userName": {
 						"value": "[parameters('testsqlDB_LS_properties_typeProperties_userName')]"
+					},
+					"Storage_Event_Trigger_properties_typeProperties_scope": {
+						"value": "[parameters('Storage_Event_Trigger_properties_typeProperties_scope')]"
 					}
 				}
 			},
