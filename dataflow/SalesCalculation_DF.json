@@ -1,0 +1,100 @@
+{
+	"name": "SalesCalculation_DF",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "SalesOrder_csv_df_DS",
+						"type": "DatasetReference"
+					},
+					"name": "SalesOrderDetails"
+				},
+				{
+					"dataset": {
+						"referenceName": "Product_csv_df_DS",
+						"type": "DatasetReference"
+					},
+					"name": "ProductDetails"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "SelectingSalesDetails"
+				},
+				{
+					"name": "FilteringHighlySoldProducts"
+				},
+				{
+					"name": "TopQuantitySold"
+				},
+				{
+					"name": "FindTopSellingProducts"
+				},
+				{
+					"name": "GetTopSellingProduct"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          SalesOrderID as integer,",
+				"          SalesOrderDetailID as integer,",
+				"          OrderQty as short,",
+				"          ProductID as short,",
+				"          UnitPrice as double,",
+				"          UnitPriceDiscount as double,",
+				"          LineTotal as double,",
+				"          rowguid as string,",
+				"          ModifiedDate as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> SalesOrderDetails",
+				"source(output(",
+				"          ProductID as short,",
+				"          Name as string,",
+				"          ProductNumber as string,",
+				"          Color as string,",
+				"          StandardCost as double,",
+				"          ListPrice as double,",
+				"          Size as string,",
+				"          Weight as double,",
+				"          ProductCategoryID as short,",
+				"          ProductModelID as short,",
+				"          SellStartDate as string,",
+				"          SellEndDate as string,",
+				"          DiscontinuedDate as string,",
+				"          ThumbNailPhoto as string,",
+				"          ThumbnailPhotoFileName as string,",
+				"          rowguid as string,",
+				"          ModifiedDate as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> ProductDetails",
+				"SalesOrderDetails select(mapColumn(",
+				"          SalesOrderID,",
+				"          SalesOrderDetailID,",
+				"          OrderQty,",
+				"          ProductID,",
+				"          UnitPrice,",
+				"          LineTotal,",
+				"          rowguid,",
+				"          ModifiedDate",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SelectingSalesDetails",
+				"SelectingSalesDetails filter(greater(OrderQty, 5)) ~> FilteringHighlySoldProducts",
+				"FilteringHighlySoldProducts aggregate(OrderQty = max(OrderQty)) ~> TopQuantitySold",
+				"TopQuantitySold, FilteringHighlySoldProducts lookup(SelectingSalesDetails@OrderQty == TopQuantitySold@OrderQty,",
+				"     multiple: true,",
+				"     broadcast: 'auto')~> FindTopSellingProducts",
+				"ProductDetails, FindTopSellingProducts exists(ProductDetails@ProductID == SelectingSalesDetails@ProductID,",
+				"     negate:false,",
+				"     broadcast: 'auto')~> GetTopSellingProduct"
+			]
+		}
+	}
+}
