@@ -1,0 +1,95 @@
+{
+	"name": "LogicApp_Runner",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy SalesOrder data",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "Generic_sqldb_DS",
+						"type": "DatasetReference",
+						"parameters": {
+							"schemaName": "saleslt",
+							"tableName": "SalesOrderDetail"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "adls_csv_DS",
+						"type": "DatasetReference",
+						"parameters": {
+							"folderPath": "LogicApp"
+						}
+					}
+				]
+			},
+			{
+				"name": "Execute Logic App",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "Copy SalesOrder data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"url": "https://prod-26.northcentralus.logic.azure.com:443/workflows/60fc25c400474fec85c101c7f6917f0b/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=2Y4lAOvlZcWkTnic0hPWcOWVkedTyfqqdQYqBRJGgfg",
+					"body": {
+						"value": "@json(concat('{ \n    \"adfName\": \"', pipeline().DataFactory, '\", \n    \"pipelineName\": \"', pipeline().Pipeline, '\", \n    \"message\": \"Sales details copied successfully, check out the generated \"Top Sales Report\" at the storage account.\", \n    \"status\": \"200 OK\"\n}'))",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"annotations": []
+	}
+}
