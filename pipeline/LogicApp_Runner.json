@@ -84,7 +84,7 @@
 					"method": "POST",
 					"url": "https://prod-26.northcentralus.logic.azure.com:443/workflows/60fc25c400474fec85c101c7f6917f0b/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=2Y4lAOvlZcWkTnic0hPWcOWVkedTyfqqdQYqBRJGgfg",
 					"body": {
-						"value": "@json(concat('{ \n    \"adfName\": \"', pipeline().DataFactory, '\", \n    \"pipelineName\": \"', pipeline().Pipeline, '\", \n    \"message\": \"Sales details copied successfully, check out the generated \"Top Sales Report\" at the storage account.\", \n    \"status\": \"200 OK\"\n}'))",
+						"value": "@json(concat('{ \n    \"adfName\": \"', pipeline().DataFactory, '\", \n    \"pipelineName\": \"', pipeline().Pipeline, '\", \n    \"message\": \"Sales details copied successfully, check out the generated \\\"Top Sales Report\\\" at the storage account.\", \n    \"status\": \"200 OK\"\n}'))",
 						"type": "Expression"
 					}
 				}
