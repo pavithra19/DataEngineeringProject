@@ -2,7 +2,7 @@
 # Azure Data Engineering Project
 
 ## Introduction
-This project demonstrates various data engineering practices using Azure services. The main objective is to showcase how to build a scalable and efficient data pipeline using Azure Data Factory, Azure Databricks, and Azure Synapse Analytics. The motivation behind this project is to provide a comprehensive guide for data engineers to leverage Azure's capabilities for data processing and analytics.
+This project demonstrates various data transformations using Azure services. The main objective is to showcase how to build a scalable and efficient data pipeline using Azure Data Factory, Azure Databricks, and Azure Synapse Analytics. This has two logical app built and also all the activities in Azure Data Factory is implemented. The motivation behind this project is to provide a comprehensive guide for data engineers to leverage Azure's capabilities for data processing and analytics.
 
 ## Getting Started
 
